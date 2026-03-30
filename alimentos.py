@@ -1,79 +1,46 @@
-import mysql.connector
-
-# Conectar com o MySQL
-
-conn = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Root123",
-    database="db_alimentos"
-)
-
-cursor = conn.cursor()
+from alimentos import inserir_alimento, conectar
 
 
-# Colocar +1 no sec
+def limpar():
+    conn = conectar()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM alimentos")
+    conn.commit()
+    conn.close()
 
-def gerar_sec(grupo_id):
 
-    cursor.execute("""
-        SELECT MAX(sec)
-        FROM alimentos
-        WHERE grupo_id = %s
-    """, (grupo_id,))
+def test_integracao_simples():
 
+    limpar()
+
+    inserir_alimento("A", "C", "BR")
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT cod, sec FROM alimentos")
     resultado = cursor.fetchone()
 
-    if resultado[0] is None:
-        sec = 1
-    else:
-        sec = int(resultado[0]) + 1
+    assert resultado[0] == "BRA0001C"
+    assert resultado[1] == 1
 
-    return sec
-
-# Gerar Código
-
-def gerar_codigo(pais, grupo_id, tipo_alimento, sec):
-
-    codigo = f"{pais}{grupo_id}{sec:04d}{tipo_alimento}"
-
-    return codigo
+    conn.close()
 
 
-# Colocar no Banco de Dados
+def test_incremento():
 
-def inserir_alimento(grupo_id, tipo_alimento, pais):
+    limpar()
 
-    sec = gerar_sec(grupo_id)
+    inserir_alimento("A", "C", "BR")
+    inserir_alimento("A", "B", "BR")
 
-    codigo = gerar_codigo(pais, grupo_id, tipo_alimento, sec)
+    conn = conectar()
+    cursor = conn.cursor()
 
-    sql = """
-    INSERT INTO alimentos (cod, sec, grupo_id, tipo_alimento, pais)
-    VALUES (%s, %s, %s, %s, %s)
-    """
+    cursor.execute("SELECT cod FROM alimentos ORDER BY id")
+    resultados = cursor.fetchall()
 
-    valores = (codigo, sec, grupo_id, tipo_alimento, pais)
+    assert resultados[0][0] == "BRA0001C"
+    assert resultados[1][0] == "BRA0002B"
 
-    cursor.execute(sql, valores)
-    conn.commit()
-
-    print("\nAlimento inserido com sucesso!")
-    print("SEC:", sec)
-    print("Código:", codigo)
-
-# Coletar Informações - (Main)
-
-def main():
-
-    print("Cadastro de Alimentos\n")
-
-    grupo_id = input("Digite o grupo (A, B, C...): ").upper()
-    tipo_alimento = input("Digite o tipo de alimento: ").upper()
-    pais = input("Digite o país (ex: BR): ").upper()
-
-    inserir_alimento(grupo_id, tipo_alimento, pais)
-
-
-if __name__ == "__main__":
-    main()
+    conn.close()
