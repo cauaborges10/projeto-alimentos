@@ -10,6 +10,3 @@ CREATE TABLE IF NOT EXISTS alimentos (
     tipo_alimento CHAR(1) NOT NULL,
     pais VARCHAR(2) NOT NULL
 );
-
-SELECT*FROM alimentos;
-);
