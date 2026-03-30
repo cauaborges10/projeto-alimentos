@@ -23,41 +23,23 @@ jobs:
 
     steps:
 
-    # 🔹 Baixar código
     - name: Checkout
       uses: actions/checkout@v4
 
-    # 🔹 Configurar Python
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
 
-    # 🔹 Instalar dependências
     - name: Instalar dependências
       run: |
         pip install pytest mysql-connector-python
 
-    # 🔹 Esperar MySQL iniciar 
     - name: Esperar MySQL iniciar
       run: sleep 30
 
-    # 🔹 Criar banco e tabela
     - name: Criar banco e tabela
-      run: |
-        mysql -h 127.0.0.1 -uroot -proot -e "
-        CREATE DATABASE IF NOT EXISTS alimentos;
-        USE alimentos;
-        CREATE TABLE IF NOT EXISTS alimentos (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          cod VARCHAR(10),
-          sec INT,
-          grupo_id CHAR(1),
-          tipo_alimento CHAR(1),
-          pais CHAR(2)
-        );
-        "
+      run: mysql -h 127.0.0.1 -uroot -proot < schema.sql
 
-    # 🔹 Rodar testes
     - name: Rodar testes
       run: pytest -v
