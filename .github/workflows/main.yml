@@ -1,0 +1,57 @@
+name: Pipeline CI
+
+on: [push]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: alimentos
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Instalar dependências
+      run: |
+        pip install pytest mysql-connector-python
+
+    - name: Esperar MySQL iniciar
+      run: sleep 20
+
+    - name: Criar banco e tabela
+      run: |
+        echo "CREATE DATABASE IF NOT EXISTS alimentos;" > schema.sql
+        echo "USE alimentos;" >> schema.sql
+        echo "CREATE TABLE IF NOT EXISTS alimentos (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          cod VARCHAR(10),
+          sec INT,
+          grupo_id CHAR(1),
+          tipo_alimento CHAR(1),
+          pais CHAR(2)
+        );" >> schema.sql
+
+        mysql -h 127.0.0.1 -uroot -proot < schema.sql
+
+    - name: Rodar testes
+      run: pytest
