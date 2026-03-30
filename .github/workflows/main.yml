@@ -12,7 +12,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: alimentos
+          MYSQL_DATABASE: db_alimentos
         ports:
           - 3306:3306
         options: >-
@@ -38,7 +38,7 @@ jobs:
       run: |
         pip install pytest mysql-connector-python
 
-    # 🔹 Esperar MySQL iniciar (IMPORTANTE)
+    # 🔹 Esperar MySQL iniciar 
     - name: Esperar MySQL iniciar
       run: sleep 30
 
