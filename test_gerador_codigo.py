@@ -1,5 +1,6 @@
 import pytest
 from alimentos import gerar_codigo
+from alimentos import inserir_alimento, conectar
 
 
 def test_codigo_primeiro_registro():
@@ -35,3 +36,29 @@ def test_numero_maior():
     codigo = gerar_codigo("BR", "A", "C", 123)
 
     assert codigo == "BRA0123C"
+
+def test_mostrar_tabela():
+
+    conn = conectar()
+    cursor = conn.cursor()
+
+    # limpa a tabela antes do teste
+    cursor.execute("DELETE FROM alimentos")
+    conn.commit()
+
+    # insere alguns dados
+    inserir_alimento("A", "C", "BR")
+    inserir_alimento("A", "B", "BR")
+
+    # consulta os dados
+    cursor.execute("SELECT * FROM alimentos")
+    resultados = cursor.fetchall()
+
+    print("\n--- TABELA ALIMENTOS ---")
+    for linha in resultados:
+        print(linha)
+
+    conn.close()
+
+    # valida se inseriu corretamente
+    assert len(resultados) == 2
