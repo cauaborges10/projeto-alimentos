@@ -42,4 +42,4 @@ jobs:
       run: mysql -h 127.0.0.1 -uroot -proot < schema.sql
 
     - name: Rodar testes
-      run: pytest -v
+      run: pytest -s -v
